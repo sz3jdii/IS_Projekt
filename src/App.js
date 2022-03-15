@@ -246,20 +246,40 @@ function App() {
 
   const [data, setData] = React.useState([]);
   const [skipPageReset, setSkipPageReset] = React.useState(false);
-
+  const columnsValidator = {
+    producent: new RegExp('^[a-z]{0,10}$'),
+    screenDiagonal: new RegExp('^[a-z]{0,10}$'),
+    screenResolution: new RegExp('^[a-z]{0,10}$'),
+    screenSurfaceType: new RegExp('^[a-z]{0,10}$'),
+    isTouchScreen: new RegExp('^(?:Tak|Nie)'),
+    CPUName: new RegExp('^[a-z]{0,10}$'),
+    CPUCores: new RegExp('/^\d+$/'),
+    CPUTiming: new RegExp('^[a-z]{0,10}$'),
+    RAMSize: new RegExp('^[a-z]{0,10}$'),
+    diskSize: new RegExp('^[a-z]{0,10}$'),
+    diskType: new RegExp('^(?:HDD|SSD)'),
+    GPUName: new RegExp('^[a-z]{0,10}$'),
+    GPUMemory: new RegExp('^[a-z]{0,10}$'),
+    OSName: new RegExp('^[a-z]{0,10}$'),
+    physicalDriveType: new RegExp('^(?:Tak|Nie)')
+  };
   const updateMyData = (rowIndex, columnId, value) => {
-    setSkipPageReset(true);
-    setData((old) =>
-      old.map((row, index) => {
-        if (index === rowIndex) {
-          return {
-            ...old[rowIndex],
-            [columnId]: value,
-          };
-        }
-        return row;
-      })
-    );
+    if(columnsValidator[columnId].test(value)){
+      setSkipPageReset(true);
+      setData((old) =>
+        old.map((row, index) => {
+          if (index === rowIndex) {
+            return {
+              ...old[rowIndex],
+              [columnId]: value,
+            };
+          }
+          return row;
+        })
+      );
+    }else{
+      alert('Wprowadzone dane są nieprawidłowe!');
+    }
   };
 
   React.useEffect(() => {
