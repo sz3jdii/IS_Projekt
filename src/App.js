@@ -1,8 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useTable, usePagination } from "react-table";
-
-import makeData from "./makeData";
+import { exportFile } from 'fs-browsers';
 
 const Styles = styled.div`
   padding: 1rem;
@@ -44,26 +43,22 @@ const Styles = styled.div`
   }
 `;
 
-// Create an editable cell renderer
 const EditableCell = ({
   value: initialValue,
   row: { index },
   column: { id },
-  updateMyData, // This is a custom function that we supplied to our table instance
+  updateMyData, 
 }) => {
-  // We need to keep and update the state of the cell normally
   const [value, setValue] = React.useState(initialValue);
 
   const onChange = (e) => {
     setValue(e.target.value);
   };
 
-  // We'll only update the external data when the input is blurred
   const onBlur = () => {
     updateMyData(index, id, value);
   };
 
-  // If the initialValue is changed external, sync it up with our state
   React.useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
@@ -71,16 +66,11 @@ const EditableCell = ({
   return <input value={value} onChange={onChange} onBlur={onBlur} />;
 };
 
-// Set our editable cell renderer as the default Cell renderer
 const defaultColumn = {
   Cell: EditableCell,
 };
 
-// Be sure to pass our updateMyData and the skipPageReset option
 function Table({ columns, data, updateMyData, skipPageReset }) {
-  // For this example, we're using pagination to illustrate how to stop
-  // the current page from resetting when our data changes
-  // Otherwise, nothing is different here.
   const {
     getTableProps,
     getTableBodyProps,
@@ -101,19 +91,12 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
       columns,
       data,
       defaultColumn,
-      // use the skipPageReset option to disable page resetting temporarily
       autoResetPage: !skipPageReset,
-      // updateMyData isn't part of the API, but
-      // anything we put into these options will
-      // automatically be available on the instance.
-      // That way we can call this function from our
-      // cell renderer!
       updateMyData,
     },
     usePagination
   );
 
-  // Render the UI for your table
   return (
     <>
       <table {...getTableProps()}>
@@ -262,16 +245,9 @@ function App() {
   );
 
   const [data, setData] = React.useState([]);
-  const [originalData] = React.useState(data);
   const [skipPageReset, setSkipPageReset] = React.useState(false);
-  // We need to keep the table from resetting the pageIndex when we
-  // Update data. So we can keep track of that flag with a ref.
 
-  // When our cell renderer calls updateMyData, we'll use
-  // the rowIndex, columnId and new value to update the
-  // original data
   const updateMyData = (rowIndex, columnId, value) => {
-    // We also turn on the flag to not reset the page
     setSkipPageReset(true);
     setData((old) =>
       old.map((row, index) => {
@@ -286,53 +262,77 @@ function App() {
     );
   };
 
-  // After data chagnes, we turn the flag back off
-  // so that if data actually changes when we're not
-  // editing it, the page is reset
   React.useEffect(() => {
     setSkipPageReset(false);
   }, [data]);
 
-  // Let's add a data resetter/randomizer to help
-  // illustrate that flow...
-  const resetData = () => setData(originalData);
+
+  const storeData = () => {
+    if(data.length !== 0){
+      let txtFileContent = '';
+      for(const product of data){
+        txtFileContent = txtFileContent+
+        product.producent+';'+
+        product.screenDiagonal+';'+
+        product.screenResolution+';'+
+        product.screenSurfaceType+';'+
+        product.isTouchScreen+';'+
+        product.CPUName+';'+
+        product.CPUCores+';'+
+        product.CPUTiming+';'+
+        product.RAMSize+';'+
+        product.diskSize+';'+
+        product.diskType+';'+
+        product.GPUName+';'+
+        product.GPUMemory+';'+
+        product.OSName+';'+
+        product.physicalDriveType+';\n';
+      }
+      exportFile(txtFileContent, { fileName: 't2_katalog.txt' });
+    }else{
+      alert('Załaduj najpierw plik źródłowy!');
+    }
+  };
 
   const loadData = (event) => {
-    const data = [];
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = function() {
-      const fileContent = reader.result.split('\n');
-      for(const fileLine of fileContent){
-        const fileField = fileLine.split(';');
-        const product = {
-          producent: fileField[0],
-          screenDiagonal: fileField[1],
-          screenResolution: fileField[2],
-          screenSurfaceType: fileField[3],
-          isTouchScreen: fileField[4],
-          CPUName: fileField[5],
-          CPUCores: fileField[6],
-          CPUTiming: fileField[7],
-          RAMSize: fileField[8],
-          diskSize: fileField[9],
-          diskType: fileField[10],
-          GPUName: fileField[11],
-          GPUMemory: fileField[12],
-          OSName: fileField[13],
-          physicalDriveType: fileField[14],
-        };
-        data.push(product);
+    if(event.target.value.length !== 0){
+      setData([]);
+      const data = [];
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function() {
+        const fileContent = reader.result.split('\n');
+        for(const fileLine of fileContent){
+          const fileField = fileLine.split(';');
+          const product = {
+            producent: fileField[0],
+            screenDiagonal: fileField[1],
+            screenResolution: fileField[2],
+            screenSurfaceType: fileField[3],
+            isTouchScreen: fileField[4],
+            CPUName: fileField[5],
+            CPUCores: fileField[6],
+            CPUTiming: fileField[7],
+            RAMSize: fileField[8],
+            diskSize: fileField[9],
+            diskType: fileField[10],
+            GPUName: fileField[11],
+            GPUMemory: fileField[12],
+            OSName: fileField[13],
+            physicalDriveType: fileField[14],
+          };
+          data.push(product);
+        }
+        setData(data);
       }
-      setData(data);
-    };
+    }
   };
 
   return (
     <Styles>
       <input type="file" onChange={loadData}/>
-      <button onClick={resetData}>Zapisz dane do pliku TXT</button>
+      <button onClick={storeData}>Zapisz dane do pliku TXT</button>
       <Table
         columns={columns}
         data={data}

@@ -9,6 +9,7 @@
   "dependencies": {
     "@tanstack/react-table": "^8.0.0-alpha.1",
     "eslint-config-prettier": "^8.5.0",
+    "fs-browsers": "^1.1.6",
     "namor": "^1.1.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
