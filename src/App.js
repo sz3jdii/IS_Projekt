@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useTable, usePagination } from "react-table";
 import { exportFile } from 'fs-browsers';
+import {xml2js} from 'xml-js';
 
 const Styles = styled.div`
   padding: 1rem;
@@ -42,7 +43,29 @@ const Styles = styled.div`
     padding: 0.5rem;
   }
 `;
-
+const Btn = styled.label`
+  background-color: rgba(51, 51, 51, 0.05);
+  border-radius: 8px;
+  border-width: 0;
+  color: #333333;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 200ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+`;
 const EditableCell = ({
   value: initialValue,
   row: { index },
@@ -179,6 +202,10 @@ function App() {
         Header: "Integracja Systemów - Adam Świątkowski",
         columns: [
           {
+            Header: 'ID',
+            accessor: 'id' 
+          },
+          {
             Header: 'Producent',
             accessor: 'producent' 
           },
@@ -287,7 +314,7 @@ function App() {
   }, [data]);
 
 
-  const storeData = () => {
+  const storeDataTxt = () => {
     if(data.length !== 0){
       let txtFileContent = '';
       for(const product of data){
@@ -314,7 +341,7 @@ function App() {
     }
   };
 
-  const loadData = (event) => {
+  const loadDataTxt = (event) => {
     if(event.target.value.length !== 0){
       setData([]);
       const data = [];
@@ -323,9 +350,11 @@ function App() {
       reader.readAsText(file);
       reader.onload = function() {
         const fileContent = reader.result.split('\n');
+        let i = 0;
         for(const fileLine of fileContent){
           const fileField = fileLine.split(';');
           const product = {
+            id: ++i,
             producent: fileField[0],
             screenDiagonal: fileField[1],
             screenResolution: fileField[2],
@@ -349,10 +378,59 @@ function App() {
     }
   };
 
+  const loadDataXml = (event) => {
+    if(event.target.value.length !== 0){
+      setData([]);
+      const data = [];
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = function() {
+        const fileContent = xml2js(reader.result, {compact: true});
+        console.log(fileContent);
+        for(const productLine of fileContent.laptops.laptop){
+          console.log(productLine);
+          const product = {
+            id: productLine._attributes.id,
+            producent: productLine.manufacturer._text,
+            screenDiagonal: productLine.screen.size._text,
+            screenResolution: productLine.screen.resolution._text,
+            screenSurfaceType: productLine.screen.type._text,
+            isTouchScreen: productLine.screen._attributes.touch == 'yes' ? 'Tak' : 'Nie',
+            CPUName: productLine.processor.name._text,
+            CPUCores: productLine.processor.physical_cores._text,
+            CPUTiming: productLine.processor.clock_speed._text,
+            RAMSize: productLine.ram._text,
+            diskSize: productLine.disc.storage._text,
+            diskType: productLine.disc._attributes !== undefined ? productLine.disc._attributes.type : null,
+            GPUName: productLine.graphic_card.name._text,
+            GPUMemory: productLine.graphic_card.memory._text,
+            OSName: productLine.os._text,
+            physicalDriveType: productLine.disc_reader._text,
+          }
+          
+          data.push(product);
+        }
+        setData(data);
+      };
+    }
+  };
   return (
     <Styles>
-      <input type="file" onChange={loadData}/>
-      <button onClick={storeData}>Zapisz dane do pliku TXT</button>
+      <Btn>
+        Wybierz plik TXT
+        <input style={{ display: "none" }} type="file" onChange={loadDataTxt}/>
+      </Btn>
+      <Btn>
+        Wybierz plik XML
+        <input style={{ display: "none" }} type="file" onChange={loadDataXml}/>
+      </Btn>
+      <Btn onClick={storeDataTxt}>
+        Zapisz dane do pliku TXT
+      </Btn>
+      <Btn onClick={storeDataTxt}>
+        Zapisz dane do pliku XML
+      </Btn>
       <Table
         columns={columns}
         data={data}

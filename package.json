@@ -15,7 +15,8 @@
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
     "react-table": "latest",
-    "styled-components": "^4.3.2"
+    "styled-components": "^4.3.2",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@rescripts/cli": "^0.0.11",
