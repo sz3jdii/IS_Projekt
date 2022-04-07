@@ -274,6 +274,7 @@ function App() {
   const [data, setData] = React.useState([]);
   const [skipPageReset, setSkipPageReset] = React.useState(false);
   const columnsValidator = {
+    id: new RegExp('/^\d+$/'),
     producent: new RegExp('^[a-z]{0,10}$'),
     screenDiagonal: new RegExp('^[a-z]{0,10}$'),
     screenResolution: new RegExp('^[a-z]{0,10}$'),
@@ -340,7 +341,17 @@ function App() {
       alert('Załaduj najpierw plik źródłowy!');
     }
   };
-
+  const storeDataXml = () => {
+    if(data.length !== 0){
+      let txtFileContent = '';
+      for(const product of data){
+        console.log(product);
+      }
+      //exportFile(txtFileContent, { fileName: 't2_katalog.txt' });
+    }else{
+      alert('Załaduj najpierw plik źródłowy!');
+    }
+  };
   const loadDataTxt = (event) => {
     if(event.target.value.length !== 0){
       setData([]);
@@ -428,7 +439,7 @@ function App() {
       <Btn onClick={storeDataTxt}>
         Zapisz dane do pliku TXT
       </Btn>
-      <Btn onClick={storeDataTxt}>
+      <Btn onClick={storeDataXml}>
         Zapisz dane do pliku XML
       </Btn>
       <Table
