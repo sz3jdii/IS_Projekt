@@ -337,19 +337,44 @@ function App() {
         product.OSName+';'+
         product.physicalDriveType+';\n';
       }
-      exportFile(txtFileContent, { fileName: 't2_katalog.txt' });
+      exportFile(txtFileContent, { fileName: 't2_katalog_new.txt' });
     }else{
       alert('Załaduj najpierw plik źródłowy!');
     }
   };
   const storeDataXml = () => {
     if(data.length !== 0){
-      let xmlFileContent = [];
+      const date = new Date();
+      let xmlFileContent = '<laptops moddate="'+date.toISOString()+'">';
       for(const product of data){
-        const laptop = {};
-        xmlFileContent.push(product);
+        xmlFileContent = xmlFileContent +
+        `<laptop id="${product.id}">
+          <manufacturer>${product.producent}</manufacturer>
+          <screen touch="${product.isTouchScreen === 'Tak' ? 'yes' : 'no'}">
+            <size>${product.screenDiagonal}</size>
+            <resolution>${product.screenResolution}</resolution>
+            <type>${product.screenSurfaceType}</type>
+          </screen>
+          <processor>
+            <name>${product.CPUName}</name>
+            <physical_cores>${product.CPUCores}</physical_cores>
+            <clock_speed>${product.CPUTiming}</clock_speed>
+          </processor>
+          <ram>${product.RAMSize}</ram>
+          <disc type="${product.diskType}">
+            <storage>${product.diskSize}</storage>
+          </disc>
+          <graphic_card>
+            <name>${product.GPUName}</name>
+            <memory>${product.GPUMemory}</memory>
+          </graphic_card>
+          <os>${product.OSName}</os>
+          <disc_reader>${product.physicalDriveType}</disc_reader>
+          </laptop>`;
+          
       }
-      //exportFile(txtFileContent, { fileName: 't2_katalog.txt' });
+      xmlFileContent = xmlFileContent+'</laptops>';
+      exportFile(xmlFileContent, { fileName: 't2_katalog_new.xml' });
     }else{
       alert('Załaduj najpierw plik źródłowy!');
     }
