@@ -275,23 +275,24 @@ function App() {
   const [skipPageReset, setSkipPageReset] = React.useState(false);
   const columnsValidator = {
     id: new RegExp('/^\d+$/'),
-    producent: new RegExp('^[a-z]{0,10}$'),
-    screenDiagonal: new RegExp('^[a-z]{0,10}$'),
-    screenResolution: new RegExp('^[a-z]{0,10}$'),
-    screenSurfaceType: new RegExp('^[a-z]{0,10}$'),
+    producent: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
+    screenDiagonal: new RegExp('^[A-Za-z0-9_."]{0,10}$'),
+    screenResolution: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
+    screenSurfaceType: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
     isTouchScreen: new RegExp('^(?:Tak|Nie)'),
-    CPUName: new RegExp('^[a-z]{0,10}$'),
+    CPUName: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
     CPUCores: new RegExp('/^\d+$/'),
-    CPUTiming: new RegExp('^[a-z]{0,10}$'),
-    RAMSize: new RegExp('^[a-z]{0,10}$'),
-    diskSize: new RegExp('^[a-z]{0,10}$'),
+    CPUTiming: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
+    RAMSize: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
+    diskSize: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
     diskType: new RegExp('^(?:HDD|SSD)'),
-    GPUName: new RegExp('^[a-z]{0,10}$'),
-    GPUMemory: new RegExp('^[a-z]{0,10}$'),
-    OSName: new RegExp('^[a-z]{0,10}$'),
+    GPUName: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
+    GPUMemory: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
+    OSName: new RegExp('^[A-Za-z0-9_.-]{0,10}$'),
     physicalDriveType: new RegExp('^(?:Tak|Nie)')
   };
   const updateMyData = (rowIndex, columnId, value) => {
+    console.log(columnId);
     if(columnsValidator[columnId].test(value)){
       setSkipPageReset(true);
       setData((old) =>
@@ -343,9 +344,10 @@ function App() {
   };
   const storeDataXml = () => {
     if(data.length !== 0){
-      let txtFileContent = '';
+      let xmlFileContent = [];
       for(const product of data){
-        console.log(product);
+        const laptop = {};
+        xmlFileContent.push(product);
       }
       //exportFile(txtFileContent, { fileName: 't2_katalog.txt' });
     }else{
@@ -398,9 +400,7 @@ function App() {
       reader.readAsText(file);
       reader.onload = function() {
         const fileContent = xml2js(reader.result, {compact: true});
-        console.log(fileContent);
         for(const productLine of fileContent.laptops.laptop){
-          console.log(productLine);
           const product = {
             id: productLine._attributes.id,
             producent: productLine.manufacturer._text,
